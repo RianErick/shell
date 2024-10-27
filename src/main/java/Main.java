@@ -1,67 +1,59 @@
-import java.io.*;
+import util.Colors;
+
+import java.awt.color.ColorSpace;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
+import static util.IO.*;
+
 public class Main {
     public static void main(String[] args) throws IOException {
         Scanner scanner = new Scanner(System.in);
-        // System.getProperty("user.dir");
         File file = new File("/mnt/5ABE59B542AC2370/Experimentos/hist.txt");
-        if (!file.exists())
-            file.createNewFile();
+
+        if (!file.exists()) {
+            boolean newFile = file.createNewFile();
+
+            if (!newFile) {
+                log(Colors.RED , "Erro ao criar o arquivo");
+            }
+        }
 
         while (true) {
-            System.out.println(("rshell> "));
+            log(Colors.GREEN , "rshell>");
             String in = scanner.nextLine();
 
             switch (in) {
-                case "exit":
-                    break;
-                case "history":
-                    findHistory();
-                    continue;
-            }
+                case "exit": break;
 
-            try {
-                FileOutputStream fileOutputStream = new FileOutputStream(file, true);
-                fileOutputStream.write((in + "\n").getBytes());
-            } catch (Exception e) {
-                System.out.println("Erro ao salvar o comando: " + e.getMessage());
+                case "history": findHistory();
+                continue;
             }
 
             List<String> commandParts = Arrays.asList(in.split(" "));
             ProcessBuilder processBuilder = new ProcessBuilder(commandParts);
 
-            try {
-                Process process = processBuilder.start();
+            boolean saved = saveCommand(in, file);
 
-                InputStreamReader inputStreamReader = new InputStreamReader(process.getInputStream());
-                BufferedReader stdInput = new BufferedReader(inputStreamReader);
-                stdInput.lines().forEach(System.out::println);
+            if (saved) {
+                try {
+                    Process process = processBuilder.start();
+                    InputStreamReader inputStreamReader = new InputStreamReader(process.getInputStream());
+                    BufferedReader stdInput = new BufferedReader(inputStreamReader);
+                    stdInput.lines().forEach(ln -> log(Colors.PURPLE , ln));
 
-                InputStreamReader errorStreamReader = new InputStreamReader(process.getErrorStream());
-                BufferedReader stdError = new BufferedReader(errorStreamReader);
-                stdError.lines().forEach(System.err::println);
-
-            } catch (IOException e) {
-                System.out.println("Erro ao executar o comando: " + e.getMessage());
+                    InputStreamReader errorStreamReader = new InputStreamReader(process.getErrorStream());
+                    BufferedReader stdError = new BufferedReader(errorStreamReader);
+                    stdError.lines().forEach(err -> log(Colors.RED , err));
+                } catch (IOException e) {
+                    log(Colors.RED , e.getMessage());
+                }
             }
         }
-    }
-
-    static void findHistory() throws IOException {
-        File history = new File("/mnt/5ABE59B542AC2370/Experimentos/hist.txt");
-        if (!history.canWrite()) {
-            System.out.println("Erro ao acessar o historico: " + history.getAbsolutePath());
-        }
-
-        BufferedReader bufferedReader = new BufferedReader(new FileReader(history));
-        bufferedReader.lines()
-                .filter(l -> !l.equals("clear"))
-                .toList()
-                .stream()
-                .limit(5).
-                forEach(System.out::println);
     }
 }
