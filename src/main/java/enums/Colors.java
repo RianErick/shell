@@ -1,4 +1,4 @@
-package util;
+package enums;
 
 public enum Colors {
     BLACK("\u001B[30m"),

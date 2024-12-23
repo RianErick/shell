@@ -1,14 +1,20 @@
 package util;
 
+import enums.Colors;
+
 import java.io.*;
 
-public class IO {
+public class InputOutputSystem {
 
     public static void findHistory() throws IOException {
-        File history = new File("/mnt/5ABE59B542AC2370/Experimentos/hist.txt");
-        if (!history.canWrite()) {
+        File history = new File("hist.txt");
+
+        if (!history.exists())
+            history.createNewFile();
+
+        if (!history.canWrite())
             log(Colors.RED,"Erro ao acessar o historico: " + history.getAbsolutePath());
-        }
+
         BufferedReader bufferedReader = new BufferedReader(new FileReader(history));
         bufferedReader.lines()
                 .filter(l -> !l.equals("clear"))
@@ -18,7 +24,7 @@ public class IO {
                 forEach(System.out::println);
     }
 
-    public static boolean saveCommand(String in ,File file) {
+    public static boolean saveCommand(String in, File file) {
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(file, true);
             fileOutputStream.write((in + "\n").getBytes());
@@ -29,7 +35,7 @@ public class IO {
         }
     }
 
-    public static void log(Colors colorLog , String msg ) {
+    public static void log(Colors colorLog, String msg) {
         System.out.println(colorLog.getCodigo() + msg + Colors.RESET.getCodigo());
     }
 }
