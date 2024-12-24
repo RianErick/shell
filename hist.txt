@@ -1,5 +1,7 @@
 ls
- history
+history
 clear
 ls
 pwd
+teste
+clear

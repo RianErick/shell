@@ -3,6 +3,9 @@ package util;
 import enums.Colors;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+import java.util.List;
 
 public class InputOutputSystem {
 
@@ -13,7 +16,7 @@ public class InputOutputSystem {
             history.createNewFile();
 
         if (!history.canWrite())
-            log(Colors.RED,"Erro ao acessar o historico: " + history.getAbsolutePath());
+            log(Colors.RED, "Erro ao acessar o historico: " + history.getAbsolutePath());
 
         BufferedReader bufferedReader = new BufferedReader(new FileReader(history));
         bufferedReader.lines()
@@ -26,12 +29,23 @@ public class InputOutputSystem {
 
     public static boolean saveCommand(String in, File file) {
         try {
+            clearHistoryForSize(file);
+
             FileOutputStream fileOutputStream = new FileOutputStream(file, true);
             fileOutputStream.write((in + "\n").getBytes());
             return true;
         } catch (Exception e) {
-            log(Colors.RED , "Erro ao salvar o arquivo: " + e.getMessage());
+            log(Colors.RED, "Erro ao salvar o arquivo: " + e.getMessage());
             return false;
+        }
+    }
+
+
+    private static void clearHistoryForSize(File file) throws IOException {
+        List<String> lines = Files.readAllLines(file.toPath());
+        if (lines.size() > 20) {
+            List<String> lastLines = lines.subList(lines.size() - 15, lines.size());
+            Files.write(file.toPath(), lastLines, StandardOpenOption.TRUNCATE_EXISTING);
         }
     }
 
